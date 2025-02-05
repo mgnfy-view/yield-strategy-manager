@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
 
 interface IYieldStrategyManager {
@@ -23,9 +23,6 @@ interface IYieldStrategyManager {
 
     error YieldStrategyManager__FailedToDepositIntoStrategy();
     error YieldStrategyManager__FailedToWithdrawFromStrategy();
-    error YieldStrategyManager__ArrayLengthMismatch();
-    error YieldStrategyManager__AddressZero();
-    error YieldStrategyManager__ValueZero();
     error YieldStrategyManager__NotWhitelistedStrategy(address strategy);
 
     function whitelistStrategy(address _strategy) external;
