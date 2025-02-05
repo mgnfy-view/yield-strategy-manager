@@ -44,5 +44,4 @@ interface IYieldStrategyManager {
         external;
     function getStrategy(uint256 _index) external view returns (address);
     function getAllStrategies() external view returns (address[] memory);
-    function getPosition(address _user, address _strategy, address _token) external view returns (uint256);
 }

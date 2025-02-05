@@ -17,7 +17,6 @@ contract YieldStrategyManager is Ownable, IYieldStrategyManager {
     using SafeERC20 for IERC20;
 
     EnumerableSet.AddressSet private s_whitelistedStrategies;
-    mapping(address user => mapping(address strategy => mapping(address token => uint256 amount))) private s_positions;
 
     constructor(address _owner) Ownable(_owner) { }
 
@@ -46,18 +45,12 @@ contract YieldStrategyManager is Ownable, IYieldStrategyManager {
     )
         external
     {
-        uint256 length = _tokens.length;
-
         _requireWhitelistedStrategy(_strategy);
-        Utils.requireLengthsMatch(length, _amounts.length);
+        Utils.requireLengthsMatch(_tokens.length, _amounts.length);
         Utils.requireNotAddressZero(_for);
         _validateAndManageInputTokenAmounts(_strategy, _tokens, _amounts);
 
-        for (uint256 i; i < length; ++i) {
-            s_positions[_for][_strategy][_tokens[i]] += _amounts[i];
-        }
-
-        bool success = IStrategy(_strategy).deposit(_tokens, _amounts, _additionalData);
+        bool success = IStrategy(_strategy).deposit(_tokens, _amounts, _additionalData, _for);
         if (!success) {
             revert YieldStrategyManager__FailedToDepositIntoStrategy();
         }
@@ -74,15 +67,9 @@ contract YieldStrategyManager is Ownable, IYieldStrategyManager {
     )
         external
     {
-        uint256 length = _tokens.length;
-
         _requireWhitelistedStrategy(_strategy);
-        Utils.requireLengthsMatch(length, _amounts.length);
+        Utils.requireLengthsMatch(_tokens.length, _amounts.length);
         Utils.requireNotAddressZero(_to);
-
-        for (uint256 i; i < length; ++i) {
-            s_positions[msg.sender][_strategy][_tokens[i]] -= _amounts[i];
-        }
 
         bool success = IStrategy(_strategy).withdraw(_tokens, _amounts, _additionalData, _to);
         if (!success) {
@@ -111,7 +98,8 @@ contract YieldStrategyManager is Ownable, IYieldStrategyManager {
             Utils.requireNotAddressZero(_tokens[i]);
             Utils.requireNotValueZero(_amounts[i]);
 
-            IERC20(_tokens[i]).safeTransferFrom(msg.sender, _strategy, _amounts[i]);
+            IERC20(_tokens[i]).safeTransferFrom(msg.sender, address(this), _amounts[i]);
+            IERC20(_tokens[i]).approve(_strategy, _amounts[i]);
         }
     }
 
@@ -121,9 +109,5 @@ contract YieldStrategyManager is Ownable, IYieldStrategyManager {
 
     function getAllStrategies() external view returns (address[] memory) {
         return s_whitelistedStrategies.values();
-    }
-
-    function getPosition(address _user, address _strategy, address _token) external view returns (uint256) {
-        return s_positions[_user][_strategy][_token];
     }
 }

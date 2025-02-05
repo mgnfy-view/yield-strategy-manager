@@ -24,7 +24,8 @@ contract MorphoBaseStrategy is ReentrancyGuard, IMorphoBaseStrategy {
     function deposit(
         address[] calldata _tokens,
         uint256[] calldata _amounts,
-        bytes calldata _additionalData
+        bytes calldata _additionalData,
+        address _for
     )
         external
         nonReentrant
@@ -39,7 +40,7 @@ contract MorphoBaseStrategy is ReentrancyGuard, IMorphoBaseStrategy {
         (, uint256 sharesReceived) =
             IMorphoStaticTyping(s_morpho).supply(marketParams, _amounts[0], 0, address(this), "");
 
-        s_shares[msg.sender][marketId] += sharesReceived;
+        s_shares[_for][marketId] += sharesReceived;
 
         emit DepsoitedIntoMorpho(msg.sender, marketId, sharesReceived);
 
@@ -79,6 +80,7 @@ contract MorphoBaseStrategy is ReentrancyGuard, IMorphoBaseStrategy {
             Utils.requireNotAddressZero(_tokens[i]);
             Utils.requireNotValueZero(_amounts[i]);
 
+            IERC20(_tokens[i]).safeTransferFrom(msg.sender, address(this), _amounts[i]);
             IERC20(_tokens[i]).approve(morpho, _amounts[i]);
         }
     }

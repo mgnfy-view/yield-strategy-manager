@@ -5,7 +5,8 @@ interface IStrategy {
     function deposit(
         address[] calldata _tokens,
         uint256[] calldata _amounts,
-        bytes calldata _additionalData
+        bytes calldata _additionalData,
+        address _for
     )
         external
         returns (bool);
