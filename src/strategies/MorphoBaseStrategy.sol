@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
 
-import { IMorphoStaticTyping, Id, MarketParams } from "../interfaces/vendors/IMorpho.sol";
+import { IMorphoStaticTyping, Id, MarketParams } from "../interfaces/vendors/morpho/IMorpho.sol";
 import { IERC20 } from "@openzeppelin/token/ERC20/IERC20.sol";
 
 import { SafeERC20 } from "@openzeppelin/token/ERC20/utils/SafeERC20.sol";
