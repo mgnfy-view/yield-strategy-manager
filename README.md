@@ -9,18 +9,18 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <!-- <a href="https://github.com/mgnfy-view/foundry-starter-template">
+  <!-- <a href="https://github.com/mgnfy-view/yield-strategy-manager">
     <img src="assets/icon.svg" alt="Logo" width="80" height="80">
   </a> -->
 
-  <h3 align="center">Project Name</h3>
+  <h3 align="center">Yield Strategy Manager</h3>
 
   <p align="center">
     Description
     <br />
-    <a href="https://github.com/mgnfy-view/foundry-starter-template/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    <a href="https://github.com/mgnfy-view/yield-strategy-manager/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     ·
-    <a href="https://github.com/mgnfy-view/foundry-starter-template/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    <a href="https://github.com/mgnfy-view/yield-strategy-manager/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
   </p>
 </div>
 
@@ -52,7 +52,7 @@
 
 ## About The Project
 
-Project description goes here.
+A yield strategy manager to be used by AI agents to maximize yield by allocating funds accross strategies. Developed for the EthGlobal Agentic hackathon.
 
 ### Built With
 
@@ -65,20 +65,20 @@ Project description goes here.
 
 ### Prerequisites
 
--
+Make sure you have git, rust, and foundry installed and configured on your system.
 
 ### Installation
 
 Clone the repo,
 
 ```shell
-git clone https://github.com/mgnfy-view/foundry-starter-template.git
+git clone https://github.com/mgnfy-view/yield-strategy-manager.git
 ```
 
 cd into the repo, and install the necessary dependencies
 
 ```shell
-cd foundry-starter-template
+cd yield-strategy-manager
 forge build
 ```
 
@@ -98,7 +98,7 @@ That's it, you are good to go now!
 -   [ ] Unit tests
 -   [ ] Write a good README.md
 
-See the [open issues](https://github.com/mgnfy-view/foundry-starter-template/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://github.com/mgnfy-view/yield-strategy-manager/issues) for a full list of proposed features (and known issues).
 
 <!-- CONTRIBUTING -->
 
@@ -132,14 +132,14 @@ Here's a gateway to all my socials, don't forget to hit me up!
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-[contributors-shield]: https://img.shields.io/github/contributors/mgnfy-view/foundry-starter-template.svg?style=for-the-badge
-[contributors-url]: https://github.com/mgnfy-view/foundry-starter-template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/mgnfy-view/foundry-starter-template.svg?style=for-the-badge
-[forks-url]: https://github.com/mgnfy-view/foundry-starter-template/network/members
-[stars-shield]: https://img.shields.io/github/stars/mgnfy-view/foundry-starter-template.svg?style=for-the-badge
-[stars-url]: https://github.com/mgnfy-view/foundry-starter-template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/mgnfy-view/foundry-starter-template.svg?style=for-the-badge
-[issues-url]: https://github.com/mgnfy-view/foundry-starter-template/issues
-[license-shield]: https://img.shields.io/github/license/mgnfy-view/foundry-starter-template.svg?style=for-the-badge
-[license-url]: https://github.com/mgnfy-view/foundry-starter-template/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/mgnfy-view/yield-strategy-manager.svg?style=for-the-badge
+[contributors-url]: https://github.com/mgnfy-view/yield-strategy-manager/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/mgnfy-view/yield-strategy-manager.svg?style=for-the-badge
+[forks-url]: https://github.com/mgnfy-view/yield-strategy-manager/network/members
+[stars-shield]: https://img.shields.io/github/stars/mgnfy-view/yield-strategy-manager.svg?style=for-the-badge
+[stars-url]: https://github.com/mgnfy-view/yield-strategy-manager/stargazers
+[issues-shield]: https://img.shields.io/github/issues/mgnfy-view/yield-strategy-manager.svg?style=for-the-badge
+[issues-url]: https://github.com/mgnfy-view/yield-strategy-manager/issues
+[license-shield]: https://img.shields.io/github/license/mgnfy-view/yield-strategy-manager.svg?style=for-the-badge
+[license-url]: https://github.com/mgnfy-view/yield-strategy-manager/blob/master/LICENSE.txt
 [linktree-url]: https://linktr.ee/mgnfy.view
