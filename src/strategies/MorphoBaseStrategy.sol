@@ -5,19 +5,25 @@ import { IMorphoStaticTyping, Id, MarketParams } from "../interfaces/vendors/mor
 import { IERC20 } from "@openzeppelin/token/ERC20/IERC20.sol";
 
 import { SafeERC20 } from "@openzeppelin/token/ERC20/utils/SafeERC20.sol";
-import { ReentrancyGuard } from "@openzeppelin/utils/ReentrancyGuard.sol";
 
 import { IMorphoBaseStrategy } from "../interfaces/strategies/IMorphoBaseStrategy.sol";
 
 import { Utils } from "../Utils.sol";
 
-contract MorphoBaseStrategy is ReentrancyGuard, IMorphoBaseStrategy {
+contract MorphoBaseStrategy is IMorphoBaseStrategy {
     using SafeERC20 for IERC20;
 
-    address s_morpho;
+    address private s_yieldStrategyManager;
+    address private s_morpho;
     mapping(address user => mapping(Id marketId => uint256 shares)) private s_shares;
 
-    constructor(address _morpho) {
+    modifier onlyYieldStrategyManager() {
+        if (msg.sender != s_yieldStrategyManager) revert MorphoBaseStrategy__NotYieldStrategyManager();
+        _;
+    }
+
+    constructor(address _yieldStrategyManager, address _morpho) {
+        s_yieldStrategyManager = _yieldStrategyManager;
         s_morpho = _morpho;
     }
 
@@ -28,10 +34,12 @@ contract MorphoBaseStrategy is ReentrancyGuard, IMorphoBaseStrategy {
         address _for
     )
         external
-        nonReentrant
+        onlyYieldStrategyManager
         returns (bool)
     {
+        Utils.requireExactlyOne(_tokens.length);
         Utils.requireLengthsMatch(_tokens.length, _amounts.length);
+        Utils.requireNotAddressZero(_for);
         _validateAndManageInputTokenAmounts(_tokens, _amounts);
 
         Id marketId = abi.decode(_additionalData, (Id));
@@ -42,32 +50,37 @@ contract MorphoBaseStrategy is ReentrancyGuard, IMorphoBaseStrategy {
 
         s_shares[_for][marketId] += sharesReceived;
 
-        emit DepositedIntoMorpho(msg.sender, marketId, sharesReceived);
+        emit DepositedIntoMorpho(_for, marketId, sharesReceived);
 
         return true;
     }
 
     function withdraw(
+        address _by,
         address[] calldata _tokens,
-        uint256[] calldata _amounts,
+        uint256[] memory _amounts,
         bytes calldata _additionalData,
         address _to
     )
         external
-        nonReentrant
+        onlyYieldStrategyManager
         returns (bool)
     {
+        Utils.requireExactlyOne(_tokens.length);
+        Utils.requireLengthsMatch(_tokens.length, _amounts.length);
+        Utils.requireNotAddressZero(_to);
+
         (Id marketId, uint256 sharesToBurn) = abi.decode(_additionalData, (Id, uint256));
-        uint256 amount = sharesToBurn > 0 ? 0 : _amounts[0];
+        _amounts[0] = sharesToBurn > 0 ? 0 : _amounts[0];
 
         MarketParams memory marketParams = _getMarketParams(marketId);
         if (marketParams.loanToken != _tokens[0]) revert MorphoBaseStrategy__NotLoanTokenForMarket();
         (, uint256 sharesBurned) =
-            IMorphoStaticTyping(s_morpho).withdraw(marketParams, amount, sharesToBurn, address(this), _to);
+            IMorphoStaticTyping(s_morpho).withdraw(marketParams, _amounts[0], sharesToBurn, address(this), _to);
 
-        s_shares[msg.sender][marketId] -= sharesBurned;
+        s_shares[_by][marketId] -= sharesBurned;
 
-        emit WithdrawnFromMorpho(msg.sender, marketId, sharesBurned, _to);
+        emit WithdrawnFromMorpho(_by, marketId, sharesBurned, _to);
 
         return true;
     }
@@ -97,6 +110,10 @@ contract MorphoBaseStrategy is ReentrancyGuard, IMorphoBaseStrategy {
             irm: irm,
             lltv: lltv
         });
+    }
+
+    function getYieldStrategyManager() external view returns (address) {
+        return s_yieldStrategyManager;
     }
 
     function getMorpho() external view returns (address) {

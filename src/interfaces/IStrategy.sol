@@ -11,6 +11,7 @@ interface IStrategy {
         external
         returns (bool);
     function withdraw(
+        address _by,
         address[] calldata _tokens,
         uint256[] calldata _amounts,
         bytes calldata _additionalData,

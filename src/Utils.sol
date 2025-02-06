@@ -2,9 +2,14 @@
 pragma solidity ^0.8.25;
 
 library Utils {
+    error Utils__NotEaxctlyOne();
     error Utils__AddressZero();
     error Utils__ValueZero();
     error Utils__LengthsDoNotMatch(uint256 length1, uint256 length2);
+
+    function requireExactlyOne(uint256 _length) internal pure {
+        if (_length != 1) revert Utils__NotEaxctlyOne();
+    }
 
     function requireNotAddressZero(address _address) internal pure {
         if (_address == address(0)) revert Utils__AddressZero();

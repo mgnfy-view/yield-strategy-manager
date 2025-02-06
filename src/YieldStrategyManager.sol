@@ -71,7 +71,7 @@ contract YieldStrategyManager is Ownable, IYieldStrategyManager {
         Utils.requireLengthsMatch(_tokens.length, _amounts.length);
         Utils.requireNotAddressZero(_to);
 
-        bool success = IStrategy(_strategy).withdraw(_tokens, _amounts, _additionalData, _to);
+        bool success = IStrategy(_strategy).withdraw(msg.sender, _tokens, _amounts, _additionalData, _to);
         if (!success) {
             revert YieldStrategyManager__FailedToWithdrawFromStrategy();
         }
