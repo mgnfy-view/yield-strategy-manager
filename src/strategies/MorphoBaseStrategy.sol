@@ -42,7 +42,7 @@ contract MorphoBaseStrategy is ReentrancyGuard, IMorphoBaseStrategy {
 
         s_shares[_for][marketId] += sharesReceived;
 
-        emit DepsoitedIntoMorpho(msg.sender, marketId, sharesReceived);
+        emit DepositedIntoMorpho(msg.sender, marketId, sharesReceived);
 
         return true;
     }
