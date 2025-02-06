@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import { YieldStrategyManager } from "../src/YieldStrategyManager.sol";
 import { Script } from "@forge/Script.sol";
+
+import { YieldStrategyManager } from "../src/YieldStrategyManager.sol";
 
 contract DeployYieldStrategyManager is Script {
     YieldStrategyManager public manager;
