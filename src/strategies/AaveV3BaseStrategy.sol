@@ -34,9 +34,6 @@ contract AaveV3BaseStrategy is IAaveV3BaseStrategy, Strategy {
         onlyYieldStrategyManager
         returns (bool)
     {
-        Utils.requireExactlyOne(_tokens.length);
-        Utils.requireLengthsMatch(_tokens.length, _amounts.length);
-        Utils.requireNotAddressZero(_for);
         _validateAndManageInputTokenAmounts(_tokens, _amounts);
 
         IPool aavePool = IPool(s_pool);
@@ -65,10 +62,6 @@ contract AaveV3BaseStrategy is IAaveV3BaseStrategy, Strategy {
         onlyYieldStrategyManager
         returns (bool)
     {
-        Utils.requireExactlyOne(_tokens.length);
-        Utils.requireLengthsMatch(_tokens.length, _amounts.length);
-        Utils.requireNotAddressZero(_to);
-
         IPool aavePool = IPool(s_pool);
         _revertIfInsufficientAmountToWithdraw(aavePool, _tokens[0], _by, _amounts[0]);
 
@@ -85,9 +78,6 @@ contract AaveV3BaseStrategy is IAaveV3BaseStrategy, Strategy {
         uint256 length = _tokens.length;
 
         for (uint256 i; i < length; ++i) {
-            Utils.requireNotAddressZero(_tokens[i]);
-            Utils.requireNotValueZero(_amounts[i]);
-
             IERC20(_tokens[i]).approve(aavePool, _amounts[i]);
         }
     }
