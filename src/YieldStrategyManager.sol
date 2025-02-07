@@ -98,8 +98,7 @@ contract YieldStrategyManager is Ownable, IYieldStrategyManager {
             Utils.requireNotAddressZero(_tokens[i]);
             Utils.requireNotValueZero(_amounts[i]);
 
-            IERC20(_tokens[i]).safeTransferFrom(msg.sender, address(this), _amounts[i]);
-            IERC20(_tokens[i]).approve(_strategy, _amounts[i]);
+            IERC20(_tokens[i]).safeTransferFrom(msg.sender, _strategy, _amounts[i]);
         }
     }
 

@@ -19,4 +19,5 @@ interface IStrategy {
     )
         external
         returns (bool);
+    function getYieldStrategyManager() external view returns (address);
 }

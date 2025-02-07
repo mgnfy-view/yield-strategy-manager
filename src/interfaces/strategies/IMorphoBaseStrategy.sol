@@ -12,7 +12,6 @@ interface IMorphoBaseStrategy is IStrategy {
     error MorphoBaseStrategy__NotYieldStrategyManager();
     error MorphoBaseStrategy__NotLoanTokenForMarket();
 
-    function getYieldStrategyManager() external view returns (address);
     function getMorpho() external view returns (address);
     function getMarketSharesForUser(address _user, Id _marketId) external view returns (uint256);
 }

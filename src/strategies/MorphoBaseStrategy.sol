@@ -8,22 +8,16 @@ import { SafeERC20 } from "@openzeppelin/token/ERC20/utils/SafeERC20.sol";
 
 import { IMorphoBaseStrategy } from "../interfaces/strategies/IMorphoBaseStrategy.sol";
 
+import { Strategy } from "../Strategy.sol";
 import { Utils } from "../Utils.sol";
 
-contract MorphoBaseStrategy is IMorphoBaseStrategy {
+contract MorphoBaseStrategy is IMorphoBaseStrategy, Strategy {
     using SafeERC20 for IERC20;
 
-    address private s_yieldStrategyManager;
     address private s_morpho;
     mapping(address user => mapping(Id marketId => uint256 shares)) private s_shares;
 
-    modifier onlyYieldStrategyManager() {
-        if (msg.sender != s_yieldStrategyManager) revert MorphoBaseStrategy__NotYieldStrategyManager();
-        _;
-    }
-
-    constructor(address _yieldStrategyManager, address _morpho) {
-        s_yieldStrategyManager = _yieldStrategyManager;
+    constructor(address _yieldStrategyManager, address _morpho) Strategy(_yieldStrategyManager) {
         s_morpho = _morpho;
     }
 
@@ -93,7 +87,6 @@ contract MorphoBaseStrategy is IMorphoBaseStrategy {
             Utils.requireNotAddressZero(_tokens[i]);
             Utils.requireNotValueZero(_amounts[i]);
 
-            IERC20(_tokens[i]).safeTransferFrom(msg.sender, address(this), _amounts[i]);
             IERC20(_tokens[i]).approve(morpho, _amounts[i]);
         }
     }
@@ -110,10 +103,6 @@ contract MorphoBaseStrategy is IMorphoBaseStrategy {
             irm: irm,
             lltv: lltv
         });
-    }
-
-    function getYieldStrategyManager() external view returns (address) {
-        return s_yieldStrategyManager;
     }
 
     function getMorpho() external view returns (address) {

@@ -10,7 +10,6 @@ interface IAaveV3BaseStrategy is IStrategy {
     error AaveV3BaseStrategy__NotYieldStrategyManager();
     error AaveV3BaseStrategy__InsufficientAmountToWitdraw();
 
-    function getYieldStrategyManager() external view returns (address);
     function getPool() external view returns (address);
     function getATokenBalance(address _user, address _asset) external view returns (uint256);
 }

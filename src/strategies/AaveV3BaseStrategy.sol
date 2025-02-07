@@ -9,24 +9,18 @@ import { ReentrancyGuard } from "@openzeppelin/utils/ReentrancyGuard.sol";
 import { IAaveV3BaseStrategy } from "../interfaces/strategies/IAaveV3BaseStrategy.sol";
 import { IPool } from "../interfaces/vendors/aave-v3/IPool.sol";
 
+import { Strategy } from "../Strategy.sol";
 import { Utils } from "../Utils.sol";
 
-contract AaveV3BaseStrategy is IAaveV3BaseStrategy {
+contract AaveV3BaseStrategy is IAaveV3BaseStrategy, Strategy {
     using SafeERC20 for IERC20;
 
     uint256 private constant E27 = 1e27;
 
-    address private s_yieldStrategyManager;
     address private s_pool;
     mapping(address user => mapping(address asset => uint256 aTokens)) private s_aTokenBalance;
 
-    modifier onlyYieldStrategyManager() {
-        if (msg.sender != s_yieldStrategyManager) revert AaveV3BaseStrategy__NotYieldStrategyManager();
-        _;
-    }
-
-    constructor(address _yieldStrategyManager, address _pool) {
-        s_yieldStrategyManager = _yieldStrategyManager;
+    constructor(address _yieldStrategyManager, address _pool) Strategy(_yieldStrategyManager) {
         s_pool = _pool;
     }
 
@@ -94,7 +88,6 @@ contract AaveV3BaseStrategy is IAaveV3BaseStrategy {
             Utils.requireNotAddressZero(_tokens[i]);
             Utils.requireNotValueZero(_amounts[i]);
 
-            IERC20(_tokens[i]).safeTransferFrom(msg.sender, address(this), _amounts[i]);
             IERC20(_tokens[i]).approve(aavePool, _amounts[i]);
         }
     }
@@ -112,10 +105,6 @@ contract AaveV3BaseStrategy is IAaveV3BaseStrategy {
         uint256 withdrawableAmount = (s_aTokenBalance[_user][_asset] * liquidityIndex) / E27;
 
         if (_amountToWithdraw > withdrawableAmount) revert AaveV3BaseStrategy__InsufficientAmountToWitdraw();
-    }
-
-    function getYieldStrategyManager() external view returns (address) {
-        return s_yieldStrategyManager;
     }
 
     function getPool() external view returns (address) {
