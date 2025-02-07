@@ -17,11 +17,11 @@ contract AaveV3BaseStrategy is IAaveV3BaseStrategy, Strategy {
 
     uint256 private constant E27 = 1e27;
 
-    address private s_pool;
+    address private immutable i_pool;
     mapping(address user => mapping(address asset => uint256 aTokens)) private s_aTokenBalance;
 
     constructor(address _yieldStrategyManager, address _pool) Strategy(_yieldStrategyManager) {
-        s_pool = _pool;
+        i_pool = _pool;
     }
 
     function deposit(
@@ -36,7 +36,7 @@ contract AaveV3BaseStrategy is IAaveV3BaseStrategy, Strategy {
     {
         _validateAndManageInputTokenAmounts(_tokens, _amounts);
 
-        IPool aavePool = IPool(s_pool);
+        IPool aavePool = IPool(i_pool);
         address aToken = aavePool.getReserveData(_tokens[0]).aTokenAddress;
         uint16 referralCode = abi.decode(_additionalData, (uint16));
         uint256 aTokenBalanceBefore = IERC20(aToken).balanceOf(address(this));
@@ -62,7 +62,7 @@ contract AaveV3BaseStrategy is IAaveV3BaseStrategy, Strategy {
         onlyYieldStrategyManager
         returns (bool)
     {
-        IPool aavePool = IPool(s_pool);
+        IPool aavePool = IPool(i_pool);
         _revertIfInsufficientAmountToWithdraw(aavePool, _tokens[0], _by, _amounts[0]);
 
         s_aTokenBalance[_by][_tokens[0]] -= _amounts[0];
@@ -74,7 +74,7 @@ contract AaveV3BaseStrategy is IAaveV3BaseStrategy, Strategy {
     }
 
     function _validateAndManageInputTokenAmounts(address[] calldata _tokens, uint256[] calldata _amounts) internal {
-        address aavePool = s_pool;
+        address aavePool = i_pool;
         uint256 length = _tokens.length;
 
         for (uint256 i; i < length; ++i) {
@@ -98,7 +98,7 @@ contract AaveV3BaseStrategy is IAaveV3BaseStrategy, Strategy {
     }
 
     function getPool() external view returns (address) {
-        return s_pool;
+        return i_pool;
     }
 
     function getATokenBalance(address _user, address _asset) external view returns (uint256) {

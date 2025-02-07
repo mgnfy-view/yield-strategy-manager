@@ -5,7 +5,8 @@ libs = ["lib"]
 remappings = [
     "@openzeppelin=lib/openzeppelin-contracts/contracts",
     "@forge=lib/forge-std/src"
-    ]
+]
+evm_version = "shanghai"
 
 [fmt]
 sort_imports = true
