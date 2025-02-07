@@ -1,29 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
 
-import { Test, console } from "@forge/Test.sol";
-
 import { IYieldStrategyManager } from "../src/interfaces/IYieldStrategyManager.sol";
 
 import { Utils } from "../src/Utils.sol";
 import { YieldStrategyManager } from "../src/YieldStrategyManager.sol";
 import { ERC20Mintable } from "./mocks/ERC20Mintable.sol";
 import { MockStrategy } from "./mocks/MockStrategy.sol";
+import { TestBase } from "./utils/TestBase.sol";
 
-contract YieldStrategyManagerTest is Test {
-    address public admin;
-    address public user;
-
-    YieldStrategyManager public manager;
+contract YieldStrategyManagerTest is TestBase {
     MockStrategy public strategy;
 
     ERC20Mintable public token;
 
-    function setUp() external {
-        admin = makeAddr("admin");
-        user = makeAddr("user");
+    function setUp() public override {
+        super.setUp();
 
-        manager = new YieldStrategyManager(admin);
         strategy = new MockStrategy(address(manager));
 
         string memory name = "Dai";
@@ -185,7 +178,6 @@ contract YieldStrategyManagerTest is Test {
 
     function test_withdrawingFromStrategyFailsForNonWhitelistedStrategy() external {
         address nonWhitelistedStrategy = makeAddr("non whitelisted strategy");
-        uint256 withdrawAmount = 100e18;
 
         address[] memory tokens = new address[](0);
         uint256[] memory amounts = new uint256[](0);
@@ -219,7 +211,7 @@ contract YieldStrategyManagerTest is Test {
         manager.withdraw(address(strategy), tokens, amounts, "", address(0));
     }
 
-    function test_withdrawingFromStrategySucceeds(uint256 _amount) internal {
+    function test_withdrawingFromStrategySucceeds() internal {
         uint256 depositAmount = 100e18;
 
         _depositIntoMockStrategy(depositAmount);
@@ -236,7 +228,7 @@ contract YieldStrategyManagerTest is Test {
         assertEq(token.balanceOf(user), depositAmount);
     }
 
-    function test_withdrawingFromStrategyEmitsEvent(uint256 _amount) internal {
+    function test_withdrawingFromStrategyEmitsEvent() internal {
         uint256 depositAmount = 100e18;
 
         _depositIntoMockStrategy(depositAmount);
@@ -251,11 +243,6 @@ contract YieldStrategyManagerTest is Test {
         vm.expectEmit(true, true, true, true);
         emit IYieldStrategyManager.WithdrawnFromStrategy(user, address(strategy), tokens, amounts, "", user);
         manager.withdraw(address(strategy), tokens, amounts, "", user);
-    }
-
-    function _addStrategy(address _newStrategy) internal {
-        vm.prank(admin);
-        manager.whitelistStrategy(_newStrategy);
     }
 
     function _depositIntoMockStrategy(uint256 _amount) internal {

@@ -14,11 +14,11 @@ import { Utils } from "../Utils.sol";
 contract MorphoBaseStrategy is IMorphoBaseStrategy, Strategy {
     using SafeERC20 for IERC20;
 
-    address private s_morpho;
+    address private immutable i_morpho;
     mapping(address user => mapping(Id marketId => uint256 shares)) private s_shares;
 
     constructor(address _yieldStrategyManager, address _morpho) Strategy(_yieldStrategyManager) {
-        s_morpho = _morpho;
+        i_morpho = _morpho;
     }
 
     function deposit(
@@ -37,7 +37,7 @@ contract MorphoBaseStrategy is IMorphoBaseStrategy, Strategy {
         MarketParams memory marketParams = _getMarketParams(marketId);
         if (marketParams.loanToken != _tokens[0]) revert MorphoBaseStrategy__NotLoanTokenForMarket();
         (, uint256 sharesReceived) =
-            IMorphoStaticTyping(s_morpho).supply(marketParams, _amounts[0], 0, address(this), "");
+            IMorphoStaticTyping(i_morpho).supply(marketParams, _amounts[0], 0, address(this), "");
 
         s_shares[_for][marketId] += sharesReceived;
 
@@ -63,7 +63,7 @@ contract MorphoBaseStrategy is IMorphoBaseStrategy, Strategy {
         MarketParams memory marketParams = _getMarketParams(marketId);
         if (marketParams.loanToken != _tokens[0]) revert MorphoBaseStrategy__NotLoanTokenForMarket();
         (, uint256 sharesBurned) =
-            IMorphoStaticTyping(s_morpho).withdraw(marketParams, _amounts[0], sharesToBurn, address(this), _to);
+            IMorphoStaticTyping(i_morpho).withdraw(marketParams, _amounts[0], sharesToBurn, address(this), _to);
 
         s_shares[_by][marketId] -= sharesBurned;
 
@@ -73,7 +73,7 @@ contract MorphoBaseStrategy is IMorphoBaseStrategy, Strategy {
     }
 
     function _validateAndManageInputTokenAmounts(address[] calldata _tokens, uint256[] calldata _amounts) internal {
-        address morpho = s_morpho;
+        address morpho = i_morpho;
         uint256 length = _tokens.length;
 
         for (uint256 i; i < length; ++i) {
@@ -82,7 +82,7 @@ contract MorphoBaseStrategy is IMorphoBaseStrategy, Strategy {
     }
 
     function _getMarketParams(Id _marketId) internal view returns (MarketParams memory) {
-        IMorphoStaticTyping morpho = IMorphoStaticTyping(s_morpho);
+        IMorphoStaticTyping morpho = IMorphoStaticTyping(i_morpho);
 
         (address loanToken, address collateralToken, address oracle, address irm, uint256 lltv) =
             morpho.idToMarketParams(_marketId);
@@ -96,7 +96,7 @@ contract MorphoBaseStrategy is IMorphoBaseStrategy, Strategy {
     }
 
     function getMorpho() external view returns (address) {
-        return s_morpho;
+        return i_morpho;
     }
 
     function getMarketSharesForUser(address _user, Id _marketId) external view returns (uint256) {
