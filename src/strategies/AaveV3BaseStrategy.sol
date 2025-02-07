@@ -7,7 +7,7 @@ import { SafeERC20 } from "@openzeppelin/token/ERC20/utils/SafeERC20.sol";
 import { ReentrancyGuard } from "@openzeppelin/utils/ReentrancyGuard.sol";
 
 import { IAaveV3BaseStrategy } from "../interfaces/strategies/IAaveV3BaseStrategy.sol";
-import { IPool } from "../interfaces/vendors/aave-v3/IPool.sol";
+import { IPool } from "../interfaces/vendors/aaveV3/IPool.sol";
 
 import { Strategy } from "../Strategy.sol";
 import { Utils } from "../Utils.sol";
