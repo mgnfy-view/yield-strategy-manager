@@ -10,7 +10,7 @@ contract DeployYieldStrategyManager is Script {
 
     function run() public returns (address) {
         vm.startBroadcast();
-        manager = new YieldStrategyManager(msg.sender);
+        manager = new YieldStrategyManager(0xd9c5ee55812e5e1c6035b52887CCE46915156E4E);
         vm.stopBroadcast();
 
         return address(manager);
