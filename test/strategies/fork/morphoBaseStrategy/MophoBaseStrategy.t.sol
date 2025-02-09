@@ -64,7 +64,7 @@ contract MorphoBaseStrategyTest is TestBase {
 
         vm.startPrank(user);
         manager.withdraw(
-            address(morphoBaseStrategy), tokens, amounts, abi.encode(ezETHUSDCMarketId, sharesReceived), user
+            user, address(morphoBaseStrategy), tokens, amounts, abi.encode(ezETHUSDCMarketId, sharesReceived), user
         );
         vm.stopPrank();
 

@@ -59,7 +59,7 @@ contract AaveV3BaseStrategyTest is TestBase {
         amounts[0] = depositAmount;
 
         vm.prank(user);
-        manager.withdraw(address(aaveV3BaseStrategy), tokens, amounts, "", user);
+        manager.withdraw(user, address(aaveV3BaseStrategy), tokens, amounts, "", user);
 
         address aUSDC = IPool(pool).getReserveData(usdc).aTokenAddress;
         uint256 userATokenBalance = aaveV3BaseStrategy.getATokenBalance(user, aUSDC);

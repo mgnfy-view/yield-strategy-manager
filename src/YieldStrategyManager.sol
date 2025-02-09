@@ -17,6 +17,7 @@ contract YieldStrategyManager is Ownable, IYieldStrategyManager {
     using SafeERC20 for IERC20;
 
     EnumerableSet.AddressSet private s_whitelistedStrategies;
+    mapping(address user => mapping(address strategy => address operator)) private s_operators;
 
     constructor(address _owner) Ownable(_owner) { }
 
@@ -34,6 +35,16 @@ contract YieldStrategyManager is Ownable, IYieldStrategyManager {
         s_whitelistedStrategies.remove(_strategy);
 
         emit RemovedStrategyFromWhitelist(_strategy);
+    }
+
+    function setOperator(address _strategy, address _operator, bool _setOperator) external {
+        _requireWhitelistedStrategy(_strategy);
+        if (_setOperator) Utils.requireNotAddressZero(_operator);
+
+        if (_setOperator) s_operators[msg.sender][_strategy] = _operator;
+        else delete s_operators[msg.sender][_strategy];
+
+        emit OperatorSet(msg.sender, _strategy, _operator, _setOperator);
     }
 
     function deposit(
@@ -59,6 +70,7 @@ contract YieldStrategyManager is Ownable, IYieldStrategyManager {
     }
 
     function withdraw(
+        address _user,
         address _strategy,
         address[] calldata _tokens,
         uint256[] calldata _amounts,
@@ -70,13 +82,14 @@ contract YieldStrategyManager is Ownable, IYieldStrategyManager {
         _requireWhitelistedStrategy(_strategy);
         Utils.requireLengthsMatch(_tokens.length, _amounts.length);
         Utils.requireNotAddressZero(_to);
+        _requireUserOrOperator(_strategy, _user);
 
-        bool success = IStrategy(_strategy).withdraw(msg.sender, _tokens, _amounts, _additionalData, _to);
+        bool success = IStrategy(_strategy).withdraw(_user, _tokens, _amounts, _additionalData, _to);
         if (!success) {
             revert YieldStrategyManager__FailedToWithdrawFromStrategy();
         }
 
-        emit WithdrawnFromStrategy(msg.sender, _strategy, _tokens, _amounts, _additionalData, _to);
+        emit WithdrawnFromStrategy(_user, _strategy, _tokens, _amounts, _additionalData, _to);
     }
 
     function _requireWhitelistedStrategy(address _strategy) internal view {
@@ -102,11 +115,21 @@ contract YieldStrategyManager is Ownable, IYieldStrategyManager {
         }
     }
 
+    function _requireUserOrOperator(address _strategy, address _user) internal view {
+        if (msg.sender != _user && s_operators[_user][_strategy] != msg.sender) {
+            revert YieldStrategyManager__NotUserOrOperator();
+        }
+    }
+
     function getStrategy(uint256 _index) external view returns (address) {
         return s_whitelistedStrategies.at(_index);
     }
 
     function getAllStrategies() external view returns (address[] memory) {
         return s_whitelistedStrategies.values();
+    }
+
+    function getOperator(address _strategy, address _user) external view returns (address) {
+        return s_operators[_user][_strategy];
     }
 }

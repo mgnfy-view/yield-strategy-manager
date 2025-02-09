@@ -91,6 +91,68 @@ contract YieldStrategyManagerTest is TestBase {
         manager.removeStrategy(newStrategy);
     }
 
+    function test_settingOperatorFailsForNonWhitelistedStrategy() external {
+        address nonWhitelistedStrategy = makeAddr("non whitelisted strategy");
+        address operator = makeAddr("operator");
+
+        vm.prank(user);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IYieldStrategyManager.YieldStrategyManager__NotWhitelistedStrategy.selector, nonWhitelistedStrategy
+            )
+        );
+        manager.setOperator(nonWhitelistedStrategy, operator, true);
+    }
+
+    function test_settingOperatorFailsForAddressZeroOperator() external {
+        vm.prank(user);
+        vm.expectRevert(Utils.Utils__AddressZero.selector);
+        manager.setOperator(address(strategy), address(0), true);
+    }
+
+    function test_settingOperatorSucceeds() external {
+        address operator = makeAddr("operator");
+
+        _addOperator(address(strategy), operator);
+
+        assertEq(manager.getOperator(address(strategy), user), operator);
+    }
+
+    function test_settingOperatorEmitsEvent() external {
+        address operator = makeAddr("operator");
+
+        vm.prank(user);
+        vm.expectEmit(true, true, true, true);
+        emit IYieldStrategyManager.OperatorSet(user, address(strategy), operator, true);
+        manager.setOperator(address(strategy), operator, true);
+
+        assertEq(manager.getOperator(address(strategy), user), operator);
+    }
+
+    function test_removingOperatorSucceeds() external {
+        address operator = makeAddr("operator");
+
+        _addOperator(address(strategy), operator);
+
+        vm.prank(user);
+        manager.setOperator(address(strategy), operator, false);
+
+        assertEq(manager.getOperator(address(strategy), user), address(0));
+    }
+
+    function test_removingOperatorEmitsEvent() external {
+        address operator = makeAddr("operator");
+
+        _addOperator(address(strategy), operator);
+
+        vm.prank(user);
+        vm.expectEmit(true, true, true, true);
+        emit IYieldStrategyManager.OperatorSet(user, address(strategy), operator, false);
+        manager.setOperator(address(strategy), operator, false);
+
+        assertEq(manager.getOperator(address(strategy), user), address(0));
+    }
+
     function test_depositingIntoStrategyFailsForNonWhitelistedStrategy() external {
         address nonWhitelistedStrategy = makeAddr("non whitelisted strategy");
 
@@ -188,7 +250,7 @@ contract YieldStrategyManagerTest is TestBase {
                 IYieldStrategyManager.YieldStrategyManager__NotWhitelistedStrategy.selector, nonWhitelistedStrategy
             )
         );
-        manager.withdraw(nonWhitelistedStrategy, tokens, amounts, "", user);
+        manager.withdraw(user, nonWhitelistedStrategy, tokens, amounts, "", user);
     }
 
     function test_withdrawingFromStrategyFailsForArrayLengthMismatch() external {
@@ -199,7 +261,7 @@ contract YieldStrategyManagerTest is TestBase {
 
         vm.prank(user);
         vm.expectRevert(abi.encodeWithSelector(Utils.Utils__LengthsDoNotMatch.selector, 1, 0));
-        manager.withdraw(address(strategy), tokens, amounts, "", user);
+        manager.withdraw(user, address(strategy), tokens, amounts, "", user);
     }
 
     function test_withdrawingFromStrategyFailsIfToIsAddressZero() external {
@@ -208,10 +270,21 @@ contract YieldStrategyManagerTest is TestBase {
 
         vm.prank(user);
         vm.expectRevert(Utils.Utils__AddressZero.selector);
-        manager.withdraw(address(strategy), tokens, amounts, "", address(0));
+        manager.withdraw(user, address(strategy), tokens, amounts, "", address(0));
     }
 
-    function test_withdrawingFromStrategySucceeds() internal {
+    function test_withdrawingFromStrategyFailsIfCallerIsNotPositionHolderOrApprovedOperator() external {
+        address randomUser = makeAddr("random address");
+
+        address[] memory tokens = new address[](0);
+        uint256[] memory amounts = new uint256[](0);
+
+        vm.prank(randomUser);
+        vm.expectRevert(IYieldStrategyManager.YieldStrategyManager__NotUserOrOperator.selector);
+        manager.withdraw(user, address(strategy), tokens, amounts, "", randomUser);
+    }
+
+    function test_withdrawingFromStrategySucceeds() external {
         uint256 depositAmount = 100e18;
 
         _depositIntoMockStrategy(depositAmount);
@@ -223,12 +296,12 @@ contract YieldStrategyManagerTest is TestBase {
         amounts[0] = depositAmount;
 
         vm.prank(user);
-        manager.withdraw(address(strategy), tokens, amounts, "", user);
+        manager.withdraw(user, address(strategy), tokens, amounts, "", user);
 
         assertEq(token.balanceOf(user), depositAmount);
     }
 
-    function test_withdrawingFromStrategyEmitsEvent() internal {
+    function test_withdrawingFromStrategyEmitsEvent() external {
         uint256 depositAmount = 100e18;
 
         _depositIntoMockStrategy(depositAmount);
@@ -242,7 +315,32 @@ contract YieldStrategyManagerTest is TestBase {
         vm.prank(user);
         vm.expectEmit(true, true, true, true);
         emit IYieldStrategyManager.WithdrawnFromStrategy(user, address(strategy), tokens, amounts, "", user);
-        manager.withdraw(address(strategy), tokens, amounts, "", user);
+        manager.withdraw(user, address(strategy), tokens, amounts, "", user);
+    }
+
+    function test_withdrawingFromStrategySucceedsIfCallerIsApprovedOperator() external {
+        uint256 depositAmount = 100e18;
+        address operator = makeAddr("operator");
+
+        _addOperator(address(strategy), operator);
+
+        _depositIntoMockStrategy(depositAmount);
+
+        address[] memory tokens = new address[](1);
+        uint256[] memory amounts = new uint256[](1);
+
+        tokens[0] = address(token);
+        amounts[0] = depositAmount;
+
+        vm.prank(operator);
+        manager.withdraw(user, address(strategy), tokens, amounts, "", operator);
+
+        assertEq(token.balanceOf(operator), depositAmount);
+    }
+
+    function _addOperator(address _strategy, address _operator) internal {
+        vm.prank(user);
+        manager.setOperator(_strategy, _operator, true);
     }
 
     function _depositIntoMockStrategy(uint256 _amount) internal {
