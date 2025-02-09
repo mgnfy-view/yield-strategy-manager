@@ -31,7 +31,8 @@ contract MorphoBaseStrategy is IMorphoBaseStrategy, Strategy {
         onlyYieldStrategyManager
         returns (bool)
     {
-        _validateAndManageInputTokenAmounts(_tokens, _amounts);
+        Utils.requireExactlyOne(_tokens.length);
+        _manageInputTokenAmounts(_tokens, _amounts);
 
         Id marketId = abi.decode(_additionalData, (Id));
         MarketParams memory marketParams = _getMarketParams(marketId);
@@ -57,6 +58,8 @@ contract MorphoBaseStrategy is IMorphoBaseStrategy, Strategy {
         onlyYieldStrategyManager
         returns (bool)
     {
+        Utils.requireExactlyOne(_tokens.length);
+
         (Id marketId, uint256 sharesToBurn) = abi.decode(_additionalData, (Id, uint256));
         _amounts[0] = sharesToBurn > 0 ? 0 : _amounts[0];
 
@@ -72,7 +75,7 @@ contract MorphoBaseStrategy is IMorphoBaseStrategy, Strategy {
         return true;
     }
 
-    function _validateAndManageInputTokenAmounts(address[] calldata _tokens, uint256[] calldata _amounts) internal {
+    function _manageInputTokenAmounts(address[] calldata _tokens, uint256[] calldata _amounts) internal {
         address morpho = i_morpho;
         uint256 length = _tokens.length;
 

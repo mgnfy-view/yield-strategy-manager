@@ -24,6 +24,8 @@ anvil :; anvil -m 'test test test test test test test test test test test junk' 
 
 precommit :; forge fmt && git add .
 
+test-all :; forge test --fork-url $(BASE_MAINNET_RPC_URL)
+
 test-yield-strategy-manager :; forge test --match-contract YieldStrategyManagerTest
 
 test-morpho-base-strategy :; forge test --match-contract MorphoBaseStrategyTest --fork-url $(BASE_MAINNET_RPC_URL)
