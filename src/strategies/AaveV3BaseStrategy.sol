@@ -12,18 +12,31 @@ import { IPool } from "../interfaces/vendors/aaveV3/IPool.sol";
 import { Strategy } from "../Strategy.sol";
 import { Utils } from "../Utils.sol";
 
+/// @title AaveV3BaseStrategy.
+/// @author mgnfy-view.
+/// @notice A simple strategy that lends tokens on Aave to earn interest.
 contract AaveV3BaseStrategy is IAaveV3BaseStrategy, Strategy {
     using SafeERC20 for IERC20;
 
     uint256 private constant E27 = 1e27;
 
+    /// @dev The Aave V3 pool address.
     address private immutable i_pool;
+    /// @dev Mapping to track user positions.
     mapping(address user => mapping(address asset => uint256 aTokens)) private s_aTokenBalance;
 
+    /// @notice Sets the yield strategy manager and Aave V3 pool addresses.
+    /// @param _yieldStrategyManager The yield strategy manager contract.
+    /// @param _pool The Aave V3 pool address.
     constructor(address _yieldStrategyManager, address _pool) Strategy(_yieldStrategyManager) {
         i_pool = _pool;
     }
 
+    /// @notice Supplies an input token to Aave V3 and receives aTokens which are tracked per user.
+    /// @param _tokens A set of tokens to supply. Only one token should be passed.
+    /// @param _amounts The token amounts to provide. Only one amount should be passed.
+    /// @param _additionalData The referral code. Optional. Pass abi.encode(0) as default.
+    /// @param _for The user to open the strategy on behalf of.
     function deposit(
         address[] calldata _tokens,
         uint256[] calldata _amounts,
@@ -52,6 +65,11 @@ contract AaveV3BaseStrategy is IAaveV3BaseStrategy, Strategy {
         return true;
     }
 
+    /// @notice Withdraws the deposited tokens by burning the aTokens.
+    /// @param _by The user whose position is to be used for withdrawal.
+    /// @param _tokens A set of tokens to withdraw. Only one token should be passed.
+    /// @param _amounts The token amounts to withdraw. Only one amount should be passed.
+    /// @param _to The address to direct the withdrawn amount to.
     function withdraw(
         address _by,
         address[] calldata _tokens,
@@ -76,6 +94,9 @@ contract AaveV3BaseStrategy is IAaveV3BaseStrategy, Strategy {
         return true;
     }
 
+    /// @notice Approves the input token to Aave V3 before calling `aaveV3Pool.supply()`.
+    /// @param _tokens The tokens to approve. Only the first token in the array is managed.
+    /// @param _amounts The amounts to apporve. Only the first amount in the array is used.
     function _manageInputTokenAmounts(address[] calldata _tokens, uint256[] calldata _amounts) internal {
         address aavePool = i_pool;
         uint256 length = _tokens.length;
@@ -85,6 +106,11 @@ contract AaveV3BaseStrategy is IAaveV3BaseStrategy, Strategy {
         }
     }
 
+    /// @notice Reverts if the amount to withdraw for is less than the user's balance.
+    /// @param _pool The Aave V3 pool.
+    /// @param _asset The asset to withdraw.
+    /// @param _user The user address.
+    /// @param _amountToWithdraw The amount to withdraw from Aave V3.
     function _revertIfInsufficientAmountToWithdraw(
         IPool _pool,
         address _asset,
@@ -100,10 +126,14 @@ contract AaveV3BaseStrategy is IAaveV3BaseStrategy, Strategy {
         if (_amountToWithdraw > withdrawableAmount) revert AaveV3BaseStrategy__InsufficientAmountToWitdraw();
     }
 
+    /// @notice Gets the Aave V3 pool address.
     function getPool() external view returns (address) {
         return i_pool;
     }
 
+    /// @notice Gets the aToken balance of a user in their position.
+    /// @param _user The user address.
+    /// @param _asset The token address.
     function getATokenBalance(address _user, address _asset) external view returns (uint256) {
         return s_aTokenBalance[_user][_asset];
     }
