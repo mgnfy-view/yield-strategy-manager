@@ -52,7 +52,7 @@
 
 ## About The Project
 
-A yield strategy manager to be used by AI agents to maximize yield by allocating funds accross strategies. Developed for the EthGlobal Agentic hackathon.
+A yield strategy manager to be used by AI agents to maximize yield by allocating funds accross strategies. The yield strategy manager contract serves as an entrypoint to create positions on different supported strategies (whitelisted by admin). The deposit function has a generalized signature suitable for most strategies/integrations, however, any additional parameters can be abi encoded and sent along with the call.  
 
 ### Built With
 
